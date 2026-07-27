@@ -1,4 +1,4 @@
-// Firebase initialization with modular SDK (v9+)
+// Firebase initialization with compat SDK
 
 let db = null;
 let isFirebaseReady = false;
@@ -9,9 +9,6 @@ const FirebaseInit = {
       // Wait for Firebase SDK to be available
       await FirebaseInit.waitForFirebase();
 
-      const { initializeApp } = window.firebase;
-      const { getFirestore } = window.firebase.firestore;
-
       // Check if config is properly set
       if (!firebaseConfig || !firebaseConfig.projectId || firebaseConfig.projectId.includes('YOUR_')) {
         console.warn('Firebase config not set. Using offline mode with local data.');
@@ -19,9 +16,9 @@ const FirebaseInit = {
         return;
       }
 
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
+      // Initialize Firebase (compat)
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
       isFirebaseReady = true;
 
       console.log('Firebase initialized successfully');
@@ -40,12 +37,12 @@ const FirebaseInit = {
 
   waitForFirebase: async () => {
     let attempts = 0;
-    while (!window.firebase && attempts < 50) {
+    while (!window.firebase || !window.firebase.firestore) {
       await new Promise(resolve => setTimeout(resolve, 100));
       attempts++;
     }
 
-    if (!window.firebase) {
+    if (!window.firebase || !window.firebase.firestore) {
       throw new Error('Firebase SDK failed to load');
     }
   },
@@ -54,9 +51,7 @@ const FirebaseInit = {
     if (!isFirebaseReady || !db) return;
 
     try {
-      const { collection, getDocs, setDoc, doc } = window.firebase.firestore;
-
-      const snap = await getDocs(collection(db, 'participants'));
+      const snap = await db.collection('participants').get();
 
       // If participants already exist, don't seed
       if (snap.size > 0) {
@@ -72,8 +67,7 @@ const FirebaseInit = {
 
       // Add each participant to Firestore
       for (const p of seedParticipants) {
-        const docRef = doc(db, 'participants', p.name);
-        await setDoc(docRef, {
+        await db.collection('participants').doc(p.name).set({
           ...p,
           id: p.name
         });
@@ -89,11 +83,9 @@ const FirebaseInit = {
   listenToCollections: async () => {
     if (!isFirebaseReady) return;
 
-    const { collection, onSnapshot } = window.firebase.firestore;
-
     try {
       // Listen to participants
-      onSnapshot(collection(db, 'participants'), (snap) => {
+      db.collection('participants').onSnapshot((snap) => {
         AppState.participants = [];
         snap.forEach(doc => {
           const data = doc.data();
@@ -107,7 +99,7 @@ const FirebaseInit = {
       });
 
       // Listen to weigh_ins
-      onSnapshot(collection(db, 'weigh_ins'), (snap) => {
+      db.collection('weigh_ins').onSnapshot((snap) => {
         AppState.weigh_ins = [];
         snap.forEach(doc => {
           const data = doc.data();
@@ -121,7 +113,7 @@ const FirebaseInit = {
       });
 
       // Listen to daily_logs
-      onSnapshot(collection(db, 'daily_logs'), (snap) => {
+      db.collection('daily_logs').onSnapshot((snap) => {
         AppState.daily_logs = [];
         snap.forEach(doc => {
           const data = doc.data();
@@ -135,7 +127,7 @@ const FirebaseInit = {
       });
 
       // Listen to bets
-      onSnapshot(collection(db, 'bets'), (snap) => {
+      db.collection('bets').onSnapshot((snap) => {
         AppState.bets = [];
         snap.forEach(doc => {
           const data = doc.data();
@@ -163,10 +155,8 @@ const FirebaseInit = {
       return;
     }
 
-    const { collection, addDoc } = window.firebase.firestore;
-
     try {
-      await addDoc(collection(db, 'weigh_ins'), {
+      await db.collection('weigh_ins').add({
         participant_id,
         date,
         weight_lbs: parseFloat(weight_lbs)
@@ -187,10 +177,8 @@ const FirebaseInit = {
       return;
     }
 
-    const { collection, addDoc } = window.firebase.firestore;
-
     try {
-      await addDoc(collection(db, 'daily_logs'), {
+      await db.collection('daily_logs').add({
         participant_id,
         date,
         ...logData
@@ -209,10 +197,8 @@ const FirebaseInit = {
       return;
     }
 
-    const { collection, addDoc } = window.firebase.firestore;
-
     try {
-      await addDoc(collection(db, 'bets'), betData);
+      await db.collection('bets').add(betData);
     } catch (error) {
       console.error('Error adding bet:', error);
     }
@@ -225,10 +211,8 @@ const FirebaseInit = {
       return;
     }
 
-    const { doc, updateDoc } = window.firebase.firestore;
-
     try {
-      await updateDoc(doc(db, 'bets', betId), updates);
+      await db.collection('bets').doc(betId).update(updates);
     } catch (error) {
       console.error('Error updating bet:', error);
     }
@@ -241,12 +225,8 @@ const FirebaseInit = {
       return;
     }
 
-    const { doc, updateDoc } = window.firebase.firestore;
-
     try {
-      // Use participant name as document ID
-      const docId = participantId;
-      await updateDoc(doc(db, 'participants', docId), updates);
+      await db.collection('participants').doc(participantId).update(updates);
     } catch (error) {
       console.error('Error updating participant:', error);
       throw error;
