@@ -1,0 +1,14 @@
+{
+  "name": "epic-help-mcp",
+  "version": "2.1.0",
+  "description": "Applied Epic help documentation MCP server — semantic search across ~1,000 help topics and video tutorials",
+  "author": {
+    "name": "epic",
+    "email": "engineering@appliedsystems.com"
+  },
+  "keywords": [
+    "epic",
+    "documentation",
+    "mcp"
+  ]
+}

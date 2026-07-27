@@ -1,0 +1,12 @@
+{
+  "name": "epic-feature-flag",
+  "version": "1.2.0",
+  "description": "Manage feature flags across ConfigCat, Epic (App Server), and Chimera Client — end-to-end orchestrator and per-codebase sub-skills",
+  "author": {
+    "name": "Applied Systems"
+  },
+  "keywords": [
+    "epic",
+    "chimera"
+  ]
+}

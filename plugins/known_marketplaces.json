@@ -1,0 +1,10 @@
+{
+  "applied-claude-marketplace": {
+    "source": {
+      "source": "git",
+      "url": "https://gitlab.com/appliedsystems/internal/enterprise/claude-market.git"
+    },
+    "installLocation": "C:\\Users\\John.Rush\\.claude\\plugins\\marketplaces\\applied-claude-marketplace",
+    "lastUpdated": "2026-07-16T22:11:24.836Z"
+  }
+}

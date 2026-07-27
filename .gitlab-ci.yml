@@ -1,0 +1,13 @@
+image: alpine:latest
+
+pages:
+  stage: deploy
+  script:
+    - mkdir -p public
+    - cp -r . public/
+    - rm -rf public/.git public/.gitignore public/.gitlab-ci.yml
+  artifacts:
+    paths:
+      - public
+  only:
+    - main

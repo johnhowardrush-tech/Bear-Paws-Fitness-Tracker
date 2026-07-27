@@ -1,0 +1,13 @@
+{
+  "name": "ads-mcp",
+  "version": "2.2.0",
+  "description": "ADS MCP server integration for the Applied Design System",
+  "author": {
+    "name": "Applied Systems",
+    "email": "engineering@appliedsystems.com"
+  },
+  "keywords": [
+    "mcp",
+    "ui"
+  ]
+}

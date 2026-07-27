@@ -1,0 +1,13 @@
+{
+  "name": "epic-mcps-api-catalog-mcp",
+  "version": "1.3.0",
+  "description": "Epic API catalog MCP server — browse, search, and live-test all Epic API endpoints by pulling OpenAPI specs from GitLab",
+  "author": {
+    "name": "epic",
+    "email": "engineering@appliedsystems.com"
+  },
+  "keywords": [
+    "epic",
+    "mcp"
+  ]
+}

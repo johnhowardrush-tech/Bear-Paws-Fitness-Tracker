@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Inbox to Action — Existing APIs Mapping</title>
+<style>
+  @page { size: Letter landscape; margin: 0.5in; }
+  body {
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+    color: #1a1a1a;
+    font-size: 9.5pt;
+    line-height: 1.45;
+  }
+  h1 {
+    font-size: 16pt;
+    margin: 0 0 2px 0;
+    color: #12224a;
+  }
+  .subtitle {
+    font-size: 10pt;
+    color: #555;
+    margin: 0 0 14px 0;
+  }
+  .note {
+    background: #eef2fb;
+    border-left: 4px solid #2c4a8c;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    font-size: 9pt;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  th, td {
+    border: 1px solid #c9ccd3;
+    padding: 7px 8px;
+    text-align: left;
+    vertical-align: top;
+    word-wrap: break-word;
+  }
+  th {
+    background: #12224a;
+    color: #fff;
+    font-size: 9.5pt;
+  }
+  col.rownum { width: 3%; }
+  col.rowname { width: 20%; }
+  col.apis { width: 77%; }
+  tr:nth-child(even) td {
+    background: #f7f8fb;
+  }
+  .rowlabel {
+    font-weight: 600;
+    color: #12224a;
+  }
+  .gap {
+    color: #a12626;
+    font-weight: 600;
+  }
+  code {
+    background: #eef0f4;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 9pt;
+  }
+  .finding {
+    margin-top: 18px;
+    background: #fdf3e7;
+    border-left: 4px solid #b8720b;
+    padding: 10px 12px;
+    font-size: 9pt;
+  }
+  .finding h2 {
+    font-size: 10.5pt;
+    margin: 0 0 6px 0;
+    color: #7a4a06;
+  }
+  footer {
+    margin-top: 16px;
+    font-size: 7.5pt;
+    color: #888;
+  }
+</style>
+</head>
+<body>
+
+<h1>Inbox to Action — Existing Epic APIs by Row</h1>
+<p class="subtitle">Mapped against the live Epic API Catalog (41 services / 279 endpoints, refreshed 2026-07-16) &middot; Companion to "Inbox to Action | Problem Space &amp; Priority Stack"</p>
+
+<div class="note">
+Each row below lists the Epic API endpoints that already exist to support that row's capability, verified directly against the API Catalog MCP rather than assumed. Confirmed gaps (no matching endpoint found anywhere in the catalog) are called out in <span class="gap">red</span>.
+</div>
+
+<table>
+<colgroup>
+  <col class="rownum"><col class="rowname"><col class="apis">
+</colgroup>
+<thead>
+<tr><th>#</th><th>Row</th><th>Existing APIs</th></tr>
+</thead>
+<tbody>
+
+<tr>
+<td>0</td>
+<td class="rowlabel">Foundation — auto-attachment, classification &amp; filing</td>
+<td>
+<b>Account/policy match:</b> <code>account</code>: <code>GET /accounts/search?email=</code> / <code>?phoneNumber=</code>; <code>client</code>: <code>GET /clients?email=&amp;phoneNumber=&amp;name_contains=&amp;address_contains=</code>; <code>policy</code>: <code>GET /clients/{clientId}/policies?policyNumber=</code>.<br>
+<b>Filing:</b> <code>attachment</code>: <code>POST /attachments</code>, <code>POST /attachments/{attachmentId}/attach-to</code>.<br>
+<b>Activity note:</b> <code>workflow-management</code>: <code>POST /activities</code> / <code>POST /system-activities</code>, <code>POST /activities/{activityId}/notes</code>.<br>
+<span class="gap">Classification itself is not an Epic API</span> — happens upstream of these calls.
+</td>
+</tr>
+
+<tr>
+<td>1</td>
+<td class="rowlabel">COI Agent — email-trigger detection (additive)</td>
+<td>
+<code>policy</code>: <code>GET /policies/{policyId}</code>, <code>GET /clients/{clientId}/policies</code>, <code>GET /lines/{lineId}</code> (coverage verification).<br>
+<b>Filing the issued cert:</b> <code>attachment</code>: <code>POST /attachments</code> (type <code>CERTIFICATE</code>).<br>
+<b>Reply:</b> <code>configure</code>: <code>POST /email-templates/{templateId}/generate-email-content</code>.<br>
+Cert issuance itself runs through CSR24, not an Epic API — consistent with the workstream's own note that COI MVP has no Epic API dependency.
+</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td class="rowlabel">Evidence of Insurance &amp; Auto ID Card (reuses COI pattern)</td>
+<td>
+Same shape as Row 1: <code>policy</code> for coverage lookup, <code>attachment</code> + <code>attachment-folder</code> for filing/retrieving the issued document, <code>configure</code> for the reply.<br>
+<span class="gap">No VIN / vehicle-schedule endpoint exists anywhere in the catalog</span> — relevant specifically to Auto ID Card's vehicle-level identification.
+</td>
+</tr>
+
+<tr>
+<td>3</td>
+<td class="rowlabel">Service inquiry resolution — coverage/billing/claims (leverages Max Search)</td>
+<td>
+<b>Coverage:</b> <code>policy</code>: <code>GET /policies/{policyId}</code>, <code>/lines/{lineId}/policy-information</code>.<br>
+<b>Billing:</b> <code>accounting</code>: <code>GET /clients/{clientId}/transactions</code>, <code>GET /payment-transactions/{referenceId}</code>.<br>
+<b>Claims status:</b> <code>policy</code>: <code>GET /clients/{clientId}/claims</code>.<br>
+<b>Doc-pull:</b> <code>attachment</code>: <code>GET /attachments</code>.<br>
+<i>Max Search itself isn't one of the 41 catalogued services</i> — whether it calls these endpoints directly or sits on a separate index isn't answerable from the catalog alone.
+</td>
+</tr>
+
+<tr>
+<td>4</td>
+<td class="rowlabel">Endorsement / change request intake (next agent)</td>
+<td>
+<b>Validate current policy:</b> <code>policy</code>: <code>GET /policies/{policyId}</code>, <code>/lines/{lineId}</code>.<br>
+<b>Create CHGE activity:</b> <code>workflow-management</code>: <code>POST /activities</code>.<br>
+<span class="gap">The carrier-facing endorsement transaction itself is a confirmed gap</span> — no <code>endorsement</code> service/endpoint exists anywhere in the 41-service catalog, matching the workstream's own "API availability is still TBD."<br>
+<span class="gap">Missing-data fields called out (VIN, payroll, AI details) are also confirmed gaps</span> — no vehicle/VIN endpoint, and no payroll endpoint anywhere (checked <code>benefits-configure</code>, the only benefits-adjacent service — it's plan configuration, not payroll/exposure data).
+</td>
+</tr>
+
+<tr>
+<td>5</td>
+<td class="rowlabel">Activity-triggered outbound communications (closes the loop)</td>
+<td>
+<b>Draft:</b> <code>configure</code>: <code>POST /email-templates/{templateId}/generate-email-content</code>.<br>
+<b>Log as filed:</b> <code>workflow-management</code>: <code>POST /activities/{activityId}/notes</code>.<br>
+<span class="gap">The trigger mechanism itself is a confirmed gap</span> — no webhook/event-subscription endpoint anywhere in the catalog; the <code>activity</code> service's <code>GET /events</code> is reference data (event <i>type</i> definitions), not a live event feed.<br>
+Send itself is Microsoft Graph, not an Epic API.
+</td>
+</tr>
+
+<tr>
+<td>6</td>
+<td class="rowlabel">Internal collaboration &amp; administration (largest category, mostly second-order)</td>
+<td>
+Slices A &amp; B reuse Row 0's account-match + <code>workflow-management</code> activity-creation APIs exactly — no new APIs.<br>
+Slice C (discussion/FYI) has no applicable API — organizational/behavioral, not an integration gap.
+</td>
+</tr>
+
+</tbody>
+</table>
+
+<div class="finding">
+<h2>Finding worth flagging back to Chase / Anupam / John Rush</h2>
+Row 0 states: "Account-match remains the hard part: 25% by business name, 22% policy number, 19% name — all unresolvable today." Checked against the API layer, <code>GET /clients/{clientId}/policies?policyNumber=</code> and <code>GET /clients?name_contains=</code> <b>do exist</b> for exactly the policy-number (22%) and name (19%) buckets. If those are still "unresolvable," the blocker is more likely match-confidence/disambiguation logic (multiple candidates, fuzzy name matching) than a missing endpoint — a meaningfully different problem to scope than "no API exists," and worth confirming before it shapes the Row 0 build plan.
+</div>
+
+<footer>Generated from the Epic API Catalog MCP (applied-claude-marketplace / epic-mcps-api-catalog-mcp v1.3.0), branch: main, specs refreshed 2026-07-16.</footer>
+
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fitness Tracker</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Chart.js for weight history charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div id="app" class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1 class="logo">💪 Fitness Tracker</h1>
+        <div class="loading" id="loading-indicator">Syncing...</div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-page="dashboard">Dashboard</button>
+      <button class="nav-tab" data-page="checkin">Check In</button>
+      <button class="nav-tab" data-page="profiles">Profiles</button>
+      <button class="nav-tab" data-page="leaderboard">Leaderboard</button>
+      <button class="nav-tab" data-page="bets">Bets</button>
+    </nav>
+
+    <!-- Page Container -->
+    <main class="pages-container">
+      <div id="dashboard-page" class="page active">
+        <div class="page-content">
+          <h2>Dashboard</h2>
+          <div id="dashboard-content">
+            <p class="loading-text">Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="checkin-page" class="page">
+        <div class="page-content">
+          <h2>Daily Check In</h2>
+          <div id="checkin-content">
+            <p class="loading-text">Loading check-in...</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="profiles-page" class="page">
+        <div class="page-content">
+          <h2>Profiles</h2>
+          <div id="profiles-content">
+            <p class="loading-text">Loading profiles...</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="leaderboard-page" class="page">
+        <div class="page-content">
+          <h2>Leaderboard</h2>
+          <div id="leaderboard-content">
+            <p class="loading-text">Loading leaderboard...</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="bets-page" class="page">
+        <div class="page-content">
+          <h2>Bets</h2>
+          <div id="bets-content">
+            <p class="loading-text">Loading bets...</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Firebase SDK (v9+ modular) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
+
+  <!-- App Scripts -->
+  <script src="config.js"></script>
+  <script src="js/firebase-init.js"></script>
+  <script src="js/utils/date.js"></script>
+  <script src="js/utils/math.js"></script>
+  <script src="js/utils/chart.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/pages/dashboard.js"></script>
+  <script src="js/pages/checkin.js"></script>
+  <script src="js/pages/profiles.js"></script>
+  <script src="js/pages/leaderboard.js"></script>
+  <script src="js/pages/bets.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "ads": {
+      "type": "http",
+      "url": "https://devex-mcp.devops.development.gcp-test.appliedcloudinternal.com/mcp-ads/mcp",
+      "oauth": { "callbackPort": 33418 }
+    }
+  }
+}

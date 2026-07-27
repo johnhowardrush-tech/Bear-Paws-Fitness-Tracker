@@ -1,0 +1,12 @@
+{
+  "name": "epic-common",
+  "version": "1.7.0",
+  "description": "Shared Epic skills — common review infrastructure, scripts, and patterns used across Epic plugins",
+  "author": {
+    "name": "epic"
+  },
+  "keywords": [
+    "epic",
+    "code-review"
+  ]
+}

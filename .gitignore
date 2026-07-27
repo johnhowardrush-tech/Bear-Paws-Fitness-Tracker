@@ -1,0 +1,48 @@
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node
+node_modules/
+package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# System
+AppData/
+Local Settings/
+Application Data/
+*.dat
+*.log
+
+# Temp files
+*.tmp
+*.temp
+
+# Keep config.js in repo (it's meant to be public with Firebase config)
+# config.js is NOT ignored - we want to track it
+
+# IDE config
+.claude/
+.vscode-shared/
+.npmrc
+.python_history
+
+# Don't track user home directories
+Claude/
+Downloads/
+Documents/
+Pictures/
+Videos/
+Music/
+Contacts/
+Favorites/
+Links/
+Searches/
+Saved Games/
+OneDrive*/

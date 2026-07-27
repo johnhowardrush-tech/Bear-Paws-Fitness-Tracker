@@ -1,0 +1,13 @@
+{
+  "name": "epic-common-create-mr",
+  "version": "1.1.0",
+  "description": "End-to-end MR creation for Epic — runs code review, coverage check, security audit, unit tests, then creates the GitLab MR",
+  "author": {
+    "name": "epic"
+  },
+  "keywords": [
+    "epic",
+    "git",
+    "code-review"
+  ]
+}

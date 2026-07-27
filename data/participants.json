@@ -1,0 +1,50 @@
+[
+  {
+    "name": "John",
+    "height_inches": 70,
+    "sex": "M",
+    "start_date": "2026-08-01",
+    "start_weight_lbs": 180,
+    "goal_weight_lbs": 170
+  },
+  {
+    "name": "Howie",
+    "height_inches": 69,
+    "sex": "M",
+    "start_date": "2026-08-01",
+    "start_weight_lbs": 195,
+    "goal_weight_lbs": 180
+  },
+  {
+    "name": "Tyler",
+    "height_inches": 72,
+    "sex": "M",
+    "start_date": "2026-08-01",
+    "start_weight_lbs": 210,
+    "goal_weight_lbs": 190
+  },
+  {
+    "name": "Will",
+    "height_inches": 68,
+    "sex": "M",
+    "start_date": "2026-08-01",
+    "start_weight_lbs": 185,
+    "goal_weight_lbs": 170
+  },
+  {
+    "name": "Michael",
+    "height_inches": 71,
+    "sex": "M",
+    "start_date": "2026-08-01",
+    "start_weight_lbs": 200,
+    "goal_weight_lbs": 185
+  },
+  {
+    "name": "Jimmy",
+    "height_inches": 67,
+    "sex": "M",
+    "start_date": "2026-08-01",
+    "start_weight_lbs": 175,
+    "goal_weight_lbs": 165
+  }
+]
