@@ -1,48 +1,50 @@
-# IDE
+# This is the fitness tracker repo - only track the app files
+
+# === CLAUDE CODE INTERNALS (don't commit) ===
+.claude/
+.claude.json
+.claude.json.backup
+.credentials.json
+.env
+.env.example
+backups/
+cache/
+file-history/
+plugins/
+projects/
+sessions/
+shell-snapshots/
+telemetry/
+.last-cleanup
+remote-settings.json
+policy-limits.json
+
+# === IDE & EDITOR ===
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Node
-node_modules/
-package-lock.json
-
-# OS
+# === OS FILES ===
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# System
-AppData/
-Local Settings/
-Application Data/
-*.dat
+# === NODE (if added later) ===
+node_modules/
+package-lock.json
+
+# === TEMP FILES ===
+*.tmp
 *.log
 
-# Temp files
-*.tmp
-*.temp
-
-# Keep config.js in repo (it's meant to be public with Firebase config)
-# config.js is NOT ignored - we want to track it
-
-# IDE config
-.claude/
-.vscode-shared/
-.npmrc
-.python_history
-
-# Don't track user home directories
-Claude/
-Downloads/
-Documents/
-Pictures/
-Videos/
-Music/
-Contacts/
-Favorites/
-Links/
-Searches/
-Saved Games/
-OneDrive*/
+# === KEEP THESE (they're the actual app) ===
+# .github/workflows/deploy.yml - GitHub Actions deploy
+# .gitignore - This file
+# .gitlab-ci.yml - GitLab deploy (optional)
+# config.js - Firebase config (public, by design)
+# index.html - Main app
+# README.md - Documentation
+# css/ - Styles
+# js/ - JavaScript
+# data/ - Seed data
