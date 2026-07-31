@@ -1,84 +1,95 @@
-// Leaderboard page - fair comparison metrics
+// Leaderboard - the full fair-comparison view
+
+let leaderboardSort = 'percent_change';
 
 function renderLeaderboard() {
   const container = document.getElementById('leaderboard-content');
   const participants = Store.getParticipants();
 
   if (participants.length === 0) {
-    container.innerHTML = Components.emptyState('No participants found', '🤔');
+    container.innerHTML = Components.emptyState('No participants found');
     return;
   }
 
-  // Calculate metrics for all participants
-  const leaderboard = participants.map(p => {
-    const currentWeight = Store.getCurrentWeight(p.name);
-    const metrics = FitnessMetrics.getMetrics(p, currentWeight);
-    return {
-      participant: p,
-      currentWeight,
-      metrics,
-      percentLost: parseFloat(metrics.percent_lost)
-    };
-  });
+  const board = Store.getScoreboard(leaderboardSort);
 
-  // Sort by percent lost descending
-  leaderboard.sort((a, b) => b.percentLost - a.percentLost);
+  const sortOptions = [
+    ['percent_change', '% of body weight (default)'],
+    ['weight_change', 'Pounds changed'],
+    ['bmi_change', 'BMI change'],
+    ['map_change', 'BP improvement (MAP)'],
+    ['map', 'Current BP (lowest MAP)'],
+    ['name', 'Name']
+  ];
 
   let html = `
-    <div style="margin-bottom: 1rem;">
-      <p>
-        <strong>Primary metric:</strong> Percent of body weight lost.
-        This accounts for different starting weights — a fair comparison.
-      </p>
+    <div class="callout">
+      <strong>Percent of body weight</strong> is the ranking metric — it puts everyone on an even
+      footing regardless of size. 10 lbs off 180 is -5.56%; 10 lbs off 220 is only -4.55%.
+      Negative numbers in green mean you're moving the right direction.
     </div>
-  `;
 
-  // Main leaderboard table
-  html += Components.leaderboardHeader();
+    <div class="toolbar">
+      <label for="lb-sort" class="text-small text-muted">Sort by</label>
+      <select id="lb-sort">
+        ${sortOptions.map(([value, label]) =>
+          `<option value="${value}" ${leaderboardSort === value ? 'selected' : ''}>${label}</option>`
+        ).join('')}
+      </select>
+    </div>
 
-  leaderboard.forEach((entry, idx) => {
-    const p = entry.participant;
-    const currentWeight = entry.currentWeight;
-    const metrics = entry.metrics;
-    html += Components.participantCard(p, currentWeight, metrics, idx + 1);
-  });
+    <div class="leaderboard-scroll mb-lg">
+      <div>
+        ${Components.leaderboardHeader()}
+        ${board.map((row, idx) => Components.leaderboardRow(row, idx + 1)).join('')}
+      </div>
+    </div>
 
-  // Detailed metrics table
-  html += `<h3 style="margin-top: 2rem; margin-bottom: 1rem;">Detailed Metrics</h3>`;
-
-  html += `
-    <div style="overflow-x: auto;">
+    <h3>Every metric side by side</h3>
+    <div class="table-scroll mb-lg">
       <table class="table">
         <thead>
           <tr>
+            <th>#</th>
             <th>Name</th>
-            <th>Started</th>
-            <th>Start Weight</th>
-            <th>Current</th>
-            <th>Lbs Lost</th>
-            <th>% Lost</th>
-            <th>Start BMI</th>
-            <th>Current BMI</th>
-            <th>BMI Change</th>
+            <th class="num">Start</th>
+            <th class="num">Current</th>
+            <th class="num">Lbs</th>
+            <th class="num">% Body wt</th>
+            <th class="num">Start BMI</th>
+            <th class="num">BMI now</th>
+            <th class="num">BMI chg</th>
+            <th class="num">BP</th>
+            <th>Category</th>
+            <th class="num">MAP</th>
+            <th class="num">MAP chg</th>
           </tr>
         </thead>
         <tbody>
   `;
 
-  leaderboard.forEach(entry => {
-    const p = entry.participant;
-    const m = entry.metrics;
+  board.forEach((row, idx) => {
+    const p = row.participant;
+    const m = row.metrics;
+    const cls = (v) => v > 0 ? 'pos' : v < 0 ? 'neg' : 'neutral';
+
     html += `
       <tr>
+        <td>${idx + 1}</td>
         <td><strong>${p.name}</strong></td>
-        <td>${DateUtils.display(p.start_date)}</td>
-        <td>${p.start_weight_lbs} lbs</td>
-        <td>${entry.currentWeight.toFixed(1)} lbs</td>
-        <td>${m.lbs_lost} lbs</td>
-        <td><strong>${m.percent_lost}%</strong></td>
-        <td>${m.start_bmi}</td>
-        <td>${m.current_bmi}</td>
-        <td>${m.bmi_change}</td>
+        <td class="num">${m.start_weight.toFixed(1)}</td>
+        <td class="num">${m.current_weight.toFixed(1)}</td>
+        <td class="num ${cls(m.weight_change)}">${FitnessMetrics.formatSigned(m.weight_change)}</td>
+        <td class="num ${cls(m.percent_change)}"><strong>${FitnessMetrics.formatSignedPercent(m.percent_change)}</strong></td>
+        <td class="num">${m.start_bmi.toFixed(1)}</td>
+        <td class="num">${m.current_bmi.toFixed(1)}</td>
+        <td class="num ${cls(m.bmi_change)}">${FitnessMetrics.formatSigned(m.bmi_change, '', 2)}</td>
+        <td class="num">${FitnessMetrics.formatBp(m.systolic, m.diastolic)}</td>
+        <td><span class="badge badge-${m.bp_category.tone}">${m.bp_category.label}</span></td>
+        <td class="num">${m.map !== null ? m.map.toFixed(1) : '--'}</td>
+        <td class="num ${m.map_change !== null ? cls(m.map_change) : 'neutral'}">
+          ${m.map_change !== null ? FitnessMetrics.formatSigned(m.map_change) : '--'}
+        </td>
       </tr>
     `;
   });
@@ -87,28 +98,33 @@ function renderLeaderboard() {
         </tbody>
       </table>
     </div>
-  `;
 
-  // Explanation
-  html += `
-    <div class="card mt-lg">
-      <h4>How the Fair Comparison Works</h4>
-      <p>
-        <strong>Percent of body weight lost</strong> is the fairest metric because
-        it accounts for starting weight differences.
-      </p>
-      <p style="margin-top: 0.5rem;">
-        Example: Someone who is 5'10" and 180 lbs losing 10 lbs is a 5.56% loss.
-        Someone who is 6'2" and 220 lbs losing 10 lbs is a 4.55% loss.
-        Even though both lost the same absolute amount, the first person's achievement
-        is proportionally larger relative to their body.
-      </p>
-      <p style="margin-top: 0.5rem;">
-        We also track absolute loss and BMI change for reference, but the primary
-        leaderboard ranking is based on percent lost.
-      </p>
+    <div class="card">
+      <h4>How the fair comparison works</h4>
+      <p><strong>Weight:</strong> we rank by percent of body weight changed, not raw pounds.
+      A 180 lb guy dropping 10 lbs (-5.56%) outranks a 220 lb guy dropping the same 10 lbs (-4.55%),
+      because it's a bigger share of his body. BMI change is shown too since it also folds in height.</p>
+
+      <p class="mt-sm"><strong>Blood pressure:</strong> we score it with
+      <strong>MAP (Mean Arterial Pressure)</strong> = diastolic + (systolic - diastolic) / 3.
+      It squashes two numbers into one comparable value, so 130/85 (MAP 100) and 145/78 (MAP 100)
+      count the same. Healthy MAP is roughly 70-100.</p>
+
+      <p class="mt-sm"><strong>MAP change</strong> is the BP equivalent of percent lost: how many
+      MAP points you've dropped from your baseline. That's the number to bet on — it rewards
+      improvement rather than whoever happens to have the best genes. Someone starting at
+      MAP 105 who gets to 95 (-10) beats someone who sat at 88 the whole time (0).</p>
+
+      <p class="mt-sm"><strong>Signs and colors:</strong> every change is current minus start.
+      Negative and green means down (good for weight, BMI, and BP). Positive and red means up.</p>
     </div>
   `;
 
   container.innerHTML = html;
+
+  const sortSelect = document.getElementById('lb-sort');
+  sortSelect.addEventListener('change', () => {
+    leaderboardSort = sortSelect.value;
+    renderLeaderboard();
+  });
 }

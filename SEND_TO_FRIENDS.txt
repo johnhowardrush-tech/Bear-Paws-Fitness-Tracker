@@ -1,0 +1,55 @@
+BEAR PAWS FITNESS TRACKER
+
+Built us a fitness tracker. Starts next month, let's go.
+
+  https://johnhowardrush-tech.github.io/Bear-Paws-Fitness-Tracker
+
+
+STEP 1 - SET UP YOUR PROFILE FIRST
+
+Go to the "Profiles" tab, find YOUR name on the card, hit "Edit stats", and fill in:
+  - Height in total inches (5'10" = 70)
+  - Your starting weight
+  - Goal weight (optional)
+  - Starting blood pressure (optional)
+
+Check the name on the card before you edit - they're in alphabetical order.
+Your starting weight is your baseline, so get it right.
+
+
+STEP 2 - CHECK IN EACH DAY
+
+Go to "Check In":
+  - Weight is REQUIRED every time
+  - Blood pressure is optional (both numbers if you do it)
+  - Did you work out? How long?
+  - How many drinks?
+
+Logged the wrong thing? Just pick that same date again and re-save. It updates
+instead of duplicating.
+
+
+HOW THE SCORING WORKS
+
+Ranking is by PERCENT of body weight, not raw pounds - so we're even regardless
+of size. 10 lbs off 180 is -5.56%, but 10 lbs off 220 is only -4.55%.
+
+Green and negative = going down. Red and positive = going up.
+
+Blood pressure gets scored with MAP (one number from your two), and the BP
+leaderboard ranks by how many points you've dropped from your own baseline.
+So it rewards improvement, not good genes.
+
+
+BETS
+
+Everyone starts at 100 points. Bet on whether someone hits a goal - weight or
+blood pressure. Someone else takes the other side, winner takes the pot.
+
+No real money. Just bragging rights.
+
+
+Heads up: no login, we all see everyone's numbers. Don't put anything in there
+you wouldn't say out loud.
+
+See you at the top of the leaderboard.

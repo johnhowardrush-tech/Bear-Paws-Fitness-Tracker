@@ -4,8 +4,10 @@
     "height_inches": 70,
     "sex": "M",
     "start_date": "2026-08-01",
-    "start_weight_lbs": 180,
-    "goal_weight_lbs": 170
+    "start_weight_lbs": 177,
+    "goal_weight_lbs": 165,
+    "start_systolic": null,
+    "start_diastolic": null
   },
   {
     "name": "Howie",
@@ -13,7 +15,9 @@
     "sex": "M",
     "start_date": "2026-08-01",
     "start_weight_lbs": 195,
-    "goal_weight_lbs": 180
+    "goal_weight_lbs": 180,
+    "start_systolic": null,
+    "start_diastolic": null
   },
   {
     "name": "Tyler",
@@ -21,7 +25,9 @@
     "sex": "M",
     "start_date": "2026-08-01",
     "start_weight_lbs": 210,
-    "goal_weight_lbs": 190
+    "goal_weight_lbs": 190,
+    "start_systolic": null,
+    "start_diastolic": null
   },
   {
     "name": "Will",
@@ -29,7 +35,9 @@
     "sex": "M",
     "start_date": "2026-08-01",
     "start_weight_lbs": 185,
-    "goal_weight_lbs": 170
+    "goal_weight_lbs": 170,
+    "start_systolic": null,
+    "start_diastolic": null
   },
   {
     "name": "Michael",
@@ -37,7 +45,9 @@
     "sex": "M",
     "start_date": "2026-08-01",
     "start_weight_lbs": 200,
-    "goal_weight_lbs": 185
+    "goal_weight_lbs": 185,
+    "start_systolic": null,
+    "start_diastolic": null
   },
   {
     "name": "Jimmy",
@@ -45,6 +55,8 @@
     "sex": "M",
     "start_date": "2026-08-01",
     "start_weight_lbs": 175,
-    "goal_weight_lbs": 165
+    "goal_weight_lbs": 165,
+    "start_systolic": null,
+    "start_diastolic": null
   }
 ]

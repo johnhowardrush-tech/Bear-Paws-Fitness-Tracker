@@ -3,22 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fitness Tracker</title>
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b1017">
+  <title>Bear Paws Fitness Tracker</title>
   <link rel="stylesheet" href="css/style.css">
-  <!-- Chart.js for weight history charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <div id="app" class="app">
-    <!-- Header -->
     <header class="header">
       <div class="header-content">
-        <h1 class="logo">💪 Fitness Tracker</h1>
+        <h1 class="logo">Bear Paws Fitness Tracker</h1>
         <div class="loading" id="loading-indicator">Syncing...</div>
       </div>
     </header>
 
-    <!-- Navigation Tabs -->
     <nav class="nav-tabs">
       <button class="nav-tab active" data-page="dashboard">Dashboard</button>
       <button class="nav-tab" data-page="checkin">Check In</button>
@@ -27,66 +26,55 @@
       <button class="nav-tab" data-page="bets">Bets</button>
     </nav>
 
-    <!-- Page Container -->
     <main class="pages-container">
       <div id="dashboard-page" class="page active">
         <div class="page-content">
           <h2>Dashboard</h2>
-          <div id="dashboard-content">
-            <p class="loading-text">Loading dashboard...</p>
-          </div>
+          <div id="dashboard-content"><p class="loading-text">Loading...</p></div>
         </div>
       </div>
 
       <div id="checkin-page" class="page">
         <div class="page-content">
           <h2>Daily Check In</h2>
-          <div id="checkin-content">
-            <p class="loading-text">Loading check-in...</p>
-          </div>
+          <div id="checkin-content"><p class="loading-text">Loading...</p></div>
         </div>
       </div>
 
       <div id="profiles-page" class="page">
         <div class="page-content">
           <h2>Profiles</h2>
-          <div id="profiles-content">
-            <p class="loading-text">Loading profiles...</p>
-          </div>
+          <div id="profiles-content"><p class="loading-text">Loading...</p></div>
         </div>
       </div>
 
       <div id="leaderboard-page" class="page">
         <div class="page-content">
           <h2>Leaderboard</h2>
-          <div id="leaderboard-content">
-            <p class="loading-text">Loading leaderboard...</p>
-          </div>
+          <div id="leaderboard-content"><p class="loading-text">Loading...</p></div>
         </div>
       </div>
 
       <div id="bets-page" class="page">
         <div class="page-content">
           <h2>Bets</h2>
-          <div id="bets-content">
-            <p class="loading-text">Loading bets...</p>
-          </div>
+          <div id="bets-content"><p class="loading-text">Loading...</p></div>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- Firebase SDK (compat version for script tags) -->
+  <!-- Firebase SDK (compat build so it works from plain script tags) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 
-  <!-- App Scripts -->
+  <!-- App -->
   <script src="config.js"></script>
-  <script src="js/firebase-init.js"></script>
   <script src="js/utils/date.js"></script>
   <script src="js/utils/math.js"></script>
   <script src="js/utils/chart.js"></script>
   <script src="js/state.js"></script>
+  <script src="js/firebase-init.js"></script>
   <script src="js/store.js"></script>
   <script src="js/components.js"></script>
   <script src="js/pages/dashboard.js"></script>

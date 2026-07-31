@@ -1,92 +1,74 @@
-// Dashboard page - home leaderboard and at-a-glance view
+// Dashboard - at-a-glance view
 
 function renderDashboard() {
   const container = document.getElementById('dashboard-content');
   const participants = Store.getParticipants();
 
   if (participants.length === 0) {
-    container.innerHTML = Components.emptyState('No participants found', '🤔');
+    container.innerHTML = Components.emptyState('No participants found');
     return;
   }
 
-  // Calculate metrics for all participants
-  const leaderboard = participants.map(p => {
-    const currentWeight = Store.getCurrentWeight(p.name);
-    const metrics = FitnessMetrics.getMetrics(p, currentWeight);
-    return {
-      participant: p,
-      currentWeight,
-      metrics,
-      percentLost: parseFloat(metrics.percent_lost)
-    };
-  });
-
-  // Sort by percent lost descending
-  leaderboard.sort((a, b) => b.percentLost - a.percentLost);
-
-  // Build HTML
-  let html = '';
-
-  // Today's activity strip
-  html += '<div class="card">';
-  html += '<h3>Today\'s Activity</h3>';
+  const board = Store.getScoreboard('percent_change');
   const today = DateUtils.today();
-  const todayLogs = participants.map(p => {
+
+  // ---- Today's strip ----
+  const workedOut = [];
+  const weighedIn = [];
+  const bpLogged = [];
+
+  participants.forEach(p => {
     const log = Store.getDailyLog(p.name, today);
-    return {
-      name: p.name,
-      worked_out: log && log.worked_out,
-      weighed_in: Store.getWeightHistory(p.name).some(w => w.date === today)
-    };
+    if (log && log.worked_out) workedOut.push(p.name);
+    if (Store.hasWeighedInOn(p.name, today)) weighedIn.push(p.name);
+    if (Store.hasLoggedBpOn(p.name, today)) bpLogged.push(p.name);
   });
-
-  const workedOut = todayLogs.filter(l => l.worked_out).map(l => l.name).join(', ');
-  const weighedIn = todayLogs.filter(l => l.weighed_in).map(l => l.name).join(', ');
-
-  html += `<p>💪 Worked out: ${workedOut || 'Nobody yet'}</p>`;
-  html += `<p>⚖️ Weighed in: ${weighedIn || 'Nobody yet'}</p>`;
 
   const openBets = Store.getOpenBets();
-  html += `<p>🎲 Open bets: <strong>${openBets.length}</strong></p>`;
-  html += '</div>';
 
-  // Leaderboard
-  html += '<div class="mb-lg">';
-  html += '<h3>Leaderboard - Fair Comparison</h3>';
-  html += Components.leaderboardHeader();
+  let html = `
+    <div class="card">
+      <h3>Today &middot; ${DateUtils.display(today)}</h3>
+      <p>Worked out: <strong>${workedOut.length ? workedOut.join(', ') : 'nobody yet'}</strong></p>
+      <p>Weighed in: <strong>${weighedIn.length ? weighedIn.join(', ') : 'nobody yet'}</strong></p>
+      <p>Logged BP: <strong>${bpLogged.length ? bpLogged.join(', ') : 'nobody yet'}</strong></p>
+      <p>Open bets: <strong>${openBets.length}</strong></p>
+    </div>
+  `;
 
-  leaderboard.forEach((entry, idx) => {
-    const p = entry.participant;
-    const currentWeight = entry.currentWeight;
-    const metrics = entry.metrics;
-    html += Components.participantCard(p, currentWeight, metrics, idx + 1);
-  });
+  // ---- Top 3 tiles ----
+  html += '<div class="grid grid-3 mb-md">';
+  board.slice(0, 3).forEach((row, idx) => {
+    const m = row.metrics;
+    const pctTone = FitnessMetrics.toneFor(m.percent_change);
+    const lbsTone = FitnessMetrics.toneFor(m.weight_change);
+    const bmiTone = FitnessMetrics.toneFor(m.bmi_change);
 
-  html += '</div>';
-
-  // Key stats
-  html += '<div class="grid grid-2">';
-  leaderboard.slice(0, 3).forEach((entry, idx) => {
-    const p = entry.participant;
-    const metrics = entry.metrics;
-
-    html += `<div class="card highlight">`;
-    html += `<h4>${idx + 1}. ${p.name}</h4>`;
-    html += `<div class="card-row">`;
-    html += `<span class="card-label">% Lost (Primary)</span>`;
-    html += `<span class="card-value primary">${metrics.percent_lost}%</span>`;
-    html += `</div>`;
-    html += `<div class="card-row">`;
-    html += `<span class="card-label">Absolute Loss</span>`;
-    html += `<span class="card-value">${metrics.lbs_lost} lbs</span>`;
-    html += `</div>`;
-    html += `<div class="card-row">`;
-    html += `<span class="card-label">BMI Change</span>`;
-    html += `<span class="card-value success">−${metrics.bmi_change}</span>`;
-    html += `</div>`;
-    html += `</div>`;
+    html += `
+      <div class="card highlight">
+        <h4>${idx + 1}. ${row.participant.name}</h4>
+        ${Components.statRow('Body weight change', FitnessMetrics.formatSignedPercent(m.percent_change), pctTone)}
+        ${Components.statRow('Pounds', FitnessMetrics.formatSigned(m.weight_change, 'lbs'), lbsTone)}
+        ${Components.statRow('BMI', FitnessMetrics.formatSigned(m.bmi_change, '', 2), bmiTone)}
+        ${Components.statRow('Blood pressure', FitnessMetrics.formatBp(m.systolic, m.diastolic), m.bp_category.tone)}
+      </div>
+    `;
   });
   html += '</div>';
+
+  // ---- Full standings ----
+  html += `
+    <h3>Standings</h3>
+    <p class="text-small text-muted mb-sm">
+      Ranked by percent of body weight change. Green is moving down, red is moving up.
+    </p>
+    <div class="leaderboard-scroll">
+      <div>
+        ${Components.leaderboardHeader()}
+        ${board.map((row, idx) => Components.leaderboardRow(row, idx + 1)).join('')}
+      </div>
+    </div>
+  `;
 
   container.innerHTML = html;
 }

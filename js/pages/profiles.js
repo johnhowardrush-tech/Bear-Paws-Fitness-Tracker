@@ -1,4 +1,4 @@
-// Profiles page - individual participant pages
+// Profiles - one card per participant, with inline editing
 
 let editingProfile = null;
 
@@ -7,172 +7,177 @@ function renderProfiles() {
   const participants = Store.getParticipants();
 
   if (participants.length === 0) {
-    container.innerHTML = Components.emptyState('No participants found', '🤔');
+    container.innerHTML = Components.emptyState('No participants found');
     return;
   }
 
   let html = '<div class="grid grid-2">';
 
   participants.forEach(p => {
-    const currentWeight = Store.getCurrentWeight(p.name);
-    const metrics = FitnessMetrics.getMetrics(p, currentWeight);
+    const { currentWeight, currentBp, startBp, metrics } = Store.getScorecard(p);
     const history = Store.getWeightHistory(p.name);
     const recentLogs = Store.getRecentLogs(p.name, 7);
-
     const chartId = `chart-${p.name.replace(/\s+/g, '-')}`;
     const isEditing = editingProfile === p.name;
 
-    html += `<div class="card">`;
+    const feet = Math.floor(p.height_inches / 12);
+    const inches = p.height_inches % 12;
 
-    // Header
+    html += '<div class="card">';
     html += `<h3>${p.name}</h3>`;
-    html += `<p class="text-muted text-small">Started ${DateUtils.display(p.start_date)}</p>`;
+    html += `<p class="text-small text-dim">Started ${DateUtils.display(p.start_date)}</p>`;
 
     if (isEditing) {
-      // Edit mode
-      const feet = Math.floor(p.height_inches / 12);
-      const inches = p.height_inches % 12;
-      html += `<div style="background: #f9fafb; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">`;
-      html += `<div style="margin-bottom: 0.75rem;">`;
-      html += `<label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem;">Height (inches total)</label>`;
-      html += `<input type="number" id="edit-height-${p.name}" value="${p.height_inches}" min="36" max="96" step="1" style="width: 100%; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.375rem;">`;
-      html += `<p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">Currently ${feet}'${inches}"</p>`;
-      html += `</div>`;
-      html += `<div style="margin-bottom: 0.75rem;">`;
-      html += `<label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem;">Starting Weight (lbs)</label>`;
-      html += `<input type="number" id="edit-start-${p.name}" value="${p.start_weight_lbs}" step="0.1" style="width: 100%; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.375rem;">`;
-      html += `</div>`;
-      html += `<div style="margin-bottom: 0.75rem;">`;
-      html += `<label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem;">Current Weight (lbs)</label>`;
-      html += `<input type="number" id="edit-current-${p.name}" value="${currentWeight.toFixed(1)}" step="0.1" style="width: 100%; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.375rem;">`;
-      html += `</div>`;
-      html += `<div style="margin-bottom: 0.75rem;">`;
-      html += `<label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem;">Goal Weight (lbs)</label>`;
-      html += `<input type="number" id="edit-goal-${p.name}" value="${p.goal_weight_lbs || ''}" step="0.1" placeholder="Optional" style="width: 100%; padding: 0.5rem; border: 1px solid #e5e7eb; border-radius: 0.375rem;">`;
-      html += `</div>`;
-      html += `<div style="display: flex; gap: 0.5rem;">`;
-      html += `<button class="btn btn-success btn-small" onclick="saveProfileEdit('${p.name}')">Save</button>`;
-      html += `<button class="btn btn-secondary btn-small" onclick="cancelProfileEdit()">Cancel</button>`;
-      html += `</div>`;
-      html += `</div>`;
+      html += `
+        <div class="form-box mt-sm">
+          <div class="form-group">
+            <label>Height (total inches)</label>
+            <input type="number" id="edit-height-${p.name}" value="${p.height_inches}"
+                   min="36" max="96" step="1">
+            <span class="form-hint">Currently ${feet}'${inches}"</span>
+          </div>
+          <div class="form-group">
+            <label>Starting weight (lbs)</label>
+            <input type="number" id="edit-start-${p.name}" value="${p.start_weight_lbs}" step="0.1">
+            <span class="form-hint">Your baseline. Everything is measured against this.</span>
+          </div>
+          <div class="form-group">
+            <label>Current weight (lbs)</label>
+            <input type="number" id="edit-current-${p.name}" value="${currentWeight.toFixed(1)}" step="0.1">
+            <span class="form-hint">Saves as today's weigh-in.</span>
+          </div>
+          <div class="form-group">
+            <label>Goal weight (lbs)</label>
+            <input type="number" id="edit-goal-${p.name}" value="${p.goal_weight_lbs || ''}"
+                   step="0.1" placeholder="Optional">
+          </div>
+          <div class="form-group">
+            <label>Starting blood pressure</label>
+            <div class="form-row">
+              <input type="number" id="edit-sys-${p.name}"
+                     value="${p.start_systolic || (startBp ? startBp.systolic : '')}"
+                     min="60" max="260" placeholder="Systolic">
+              <input type="number" id="edit-dia-${p.name}"
+                     value="${p.start_diastolic || (startBp ? startBp.diastolic : '')}"
+                     min="30" max="180" placeholder="Diastolic">
+            </div>
+            <span class="form-hint">Your BP baseline. Leave blank to use your first logged reading.</span>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-success btn-small" onclick="saveProfileEdit('${p.name}')">Save</button>
+            <button class="btn btn-secondary btn-small" onclick="cancelProfileEdit()">Cancel</button>
+          </div>
+          <p class="text-small text-danger hidden" id="edit-error-${p.name}"></p>
+        </div>
+      `;
     } else {
-      // View mode
-      const feet = Math.floor(p.height_inches / 12);
-      const inches = p.height_inches % 12;
-      html += `<div class="card-row">`;
-      html += `<span class="card-label">Height</span>`;
-      html += `<span class="card-value">${feet}'${inches}"</span>`;
-      html += `</div>`;
-
-      html += `<div class="card-row">`;
-      html += `<span class="card-label">Starting Weight</span>`;
-      html += `<span class="card-value">${p.start_weight_lbs} lbs</span>`;
-      html += `</div>`;
-
-      html += `<div class="card-row">`;
-      html += `<span class="card-label">Current Weight</span>`;
-      html += `<span class="card-value primary">${currentWeight.toFixed(1)} lbs</span>`;
-      html += `</div>`;
+      html += Components.statRow('Height', `${feet}'${inches}"`);
+      html += Components.statRow('Starting weight', `${p.start_weight_lbs} lbs`);
+      html += Components.statRow('Current weight', `${currentWeight.toFixed(1)} lbs`, 'primary');
 
       if (p.goal_weight_lbs) {
-        const remaining = currentWeight - p.goal_weight_lbs;
-        html += `<div class="card-row">`;
-        html += `<span class="card-label">Goal Weight</span>`;
-        html += `<span class="card-value">${p.goal_weight_lbs} lbs</span>`;
-        html += `</div>`;
-        html += `<div class="card-row">`;
-        html += `<span class="card-label">To Goal</span>`;
-        html += `<span class="card-value ${remaining > 0 ? 'warning' : 'success'}">${remaining > 0 ? '+' : ''}${remaining.toFixed(1)} lbs</span>`;
-        html += `</div>`;
+        const toGoal = currentWeight - p.goal_weight_lbs;
+        html += Components.statRow('Goal weight', `${p.goal_weight_lbs} lbs`);
+        html += Components.statRow(
+          'To goal',
+          toGoal > 0 ? `${toGoal.toFixed(1)} lbs to go` : 'Goal reached',
+          toGoal > 0 ? 'warning' : 'success'
+        );
       }
 
-      html += `<button class="btn btn-secondary btn-small" onclick="startProfileEdit('${p.name}')" style="margin-top: 1rem; width: 100%;">✏️ Edit</button>`;
+      html += '<hr class="divider">';
+
+      html += '<div class="section-label">Progress</div>';
+      html += Components.statRow(
+        'Body weight change',
+        FitnessMetrics.formatSignedPercent(metrics.percent_change),
+        FitnessMetrics.toneFor(metrics.percent_change)
+      );
+      html += Components.statRow(
+        'Pounds change',
+        FitnessMetrics.formatSigned(metrics.weight_change, 'lbs'),
+        FitnessMetrics.toneFor(metrics.weight_change)
+      );
+      html += Components.statRow('Starting BMI', metrics.start_bmi.toFixed(1));
+      html += Components.statRow('Current BMI', metrics.current_bmi.toFixed(1));
+      html += Components.statRow(
+        'BMI change',
+        FitnessMetrics.formatSigned(metrics.bmi_change, '', 2),
+        FitnessMetrics.toneFor(metrics.bmi_change)
+      );
+
+      html += '<hr class="divider">';
+
+      html += `<div class="section-label">Blood pressure ${Components.bpBadge(metrics)}</div>`;
+      if (currentBp) {
+        html += Components.statRow(
+          'Latest reading',
+          `${FitnessMetrics.formatBp(metrics.systolic, metrics.diastolic)} <span class="text-dim text-small">(${DateUtils.displayRelative(currentBp.date)})</span>`,
+          metrics.bp_category.tone
+        );
+        html += Components.statRow('MAP', metrics.map.toFixed(1));
+        if (startBp) {
+          html += Components.statRow(
+            'Baseline',
+            FitnessMetrics.formatBp(startBp.systolic, startBp.diastolic)
+          );
+        }
+        if (metrics.map_change !== null) {
+          html += Components.statRow(
+            'MAP change',
+            FitnessMetrics.formatSigned(metrics.map_change, 'pts'),
+            FitnessMetrics.toneFor(metrics.map_change)
+          );
+        }
+      } else {
+        html += '<p class="text-small text-dim">No blood pressure logged yet. Add one on the Check In tab.</p>';
+      }
+
+      html += `<button class="btn btn-secondary btn-small btn-block mt-md"
+                       onclick="startProfileEdit('${p.name}')">Edit stats</button>`;
     }
-
-    html += `<hr style="margin: 1rem 0; border: none; border-top: 1px solid #e5e7eb;">`;
-
-    // Progress metrics
-    html += `<div class="card-row">`;
-    html += `<span class="card-label">% Lost (Fair Metric)</span>`;
-    html += `<span class="card-value primary">${metrics.percent_lost}%</span>`;
-    html += `</div>`;
-
-    html += `<div class="card-row">`;
-    html += `<span class="card-label">Absolute Loss</span>`;
-    html += `<span class="card-value">${metrics.lbs_lost} lbs</span>`;
-    html += `</div>`;
-
-    html += `<div class="card-row">`;
-    html += `<span class="card-label">Starting BMI</span>`;
-    html += `<span class="card-value">${metrics.start_bmi}</span>`;
-    html += `</div>`;
-
-    html += `<div class="card-row">`;
-    html += `<span class="card-label">Current BMI</span>`;
-    html += `<span class="card-value">${metrics.current_bmi}</span>`;
-    html += `</div>`;
-
-    html += `<div class="card-row">`;
-    html += `<span class="card-label">BMI Change</span>`;
-    html += `<span class="card-value success">−${metrics.bmi_change}</span>`;
-    html += `</div>`;
 
     // Weight chart
     if (history.length > 1) {
-      const dates = history.map(w => w.date);
-      const weights = history.map(w => w.weight_lbs);
-
-      html += `<div class="chart-container">`;
-      html += `<canvas id="${chartId}"></canvas>`;
-      html += `</div>`;
+      html += `<div class="chart-container"><canvas id="${chartId}"></canvas></div>`;
     }
 
-    // Recent activity
-    html += `<h4 style="margin-top: 1.5rem; margin-bottom: 0.75rem;">Recent Activity</h4>`;
-
+    html += '<div class="section-label mt-md">Last 7 days</div>';
     if (recentLogs.length === 0) {
-      html += `<p class="text-muted text-small">No activity logged in the past week</p>`;
+      html += '<p class="text-small text-dim">Nothing logged this week.</p>';
     } else {
-      recentLogs.slice(0, 3).forEach(log => {
+      recentLogs.slice(0, 4).forEach(log => {
         const parts = [];
         if (log.worked_out) {
-          const mins = log.workout_minutes ? ` (${log.workout_minutes} min)` : '';
-          parts.push(`💪 Worked out${mins}`);
+          parts.push(`worked out${log.workout_minutes ? ` ${log.workout_minutes} min` : ''}`);
         }
-        if (log.drinks > 0) {
-          parts.push(`🍷 ${log.drinks} drink${log.drinks !== 1 ? 's' : ''}`);
-        }
-        if (log.notes) {
-          parts.push(`📝 ${log.notes}`);
-        }
-
-        if (parts.length > 0) {
-          html += `<p class="text-small text-muted">${DateUtils.displayRelative(log.date)}: ${parts.join(' • ')}</p>`;
-        }
+        if (log.drinks > 0) parts.push(`${log.drinks} drink${log.drinks !== 1 ? 's' : ''}`);
+        if (log.notes) parts.push(log.notes);
+        html += `<p class="text-small text-muted">
+          <strong>${DateUtils.displayRelative(log.date)}</strong> — ${parts.length ? parts.join(' &middot; ') : 'rest day'}
+        </p>`;
       });
     }
 
-    html += `</div>`;
+    html += '</div>';
   });
 
   html += '</div>';
-
   container.innerHTML = html;
 
-  // Initialize charts after rendering
+  // Charts need the canvases in the DOM first
   setTimeout(() => {
     participants.forEach(p => {
-      const chartId = `chart-${p.name.replace(/\s+/g, '-')}`;
       const history = Store.getWeightHistory(p.name);
-
       if (history.length > 1) {
-        const dates = history.map(w => w.date);
-        const weights = history.map(w => w.weight_lbs);
-
-        ChartUtils.createWeightChart(chartId, dates, weights, p.name);
+        ChartUtils.createWeightChart(
+          `chart-${p.name.replace(/\s+/g, '-')}`,
+          history.map(w => w.date),
+          history.map(w => w.weight_lbs)
+        );
       }
     });
-  }, 100);
+  }, 50);
 }
 
 function startProfileEdit(participantName) {
@@ -186,49 +191,49 @@ function cancelProfileEdit() {
 }
 
 async function saveProfileEdit(participantName) {
-  const heightEl = document.getElementById(`edit-height-${participantName}`);
-  const startWeightEl = document.getElementById(`edit-start-${participantName}`);
-  const currentWeightEl = document.getElementById(`edit-current-${participantName}`);
-  const goalWeightEl = document.getElementById(`edit-goal-${participantName}`);
+  const val = (prefix) => document.getElementById(`edit-${prefix}-${participantName}`).value;
+  const errorEl = document.getElementById(`edit-error-${participantName}`);
 
-  const height = parseInt(heightEl.value);
-  const startWeight = parseFloat(startWeightEl.value);
-  const currentWeight = parseFloat(currentWeightEl.value);
-  const goalWeight = goalWeightEl.value ? parseFloat(goalWeightEl.value) : null;
+  const fail = (message) => {
+    errorEl.textContent = message;
+    errorEl.classList.remove('hidden');
+  };
 
-  if (!height || !startWeight || !currentWeight) {
-    alert('Height, start weight, and current weight are required');
-    return;
+  const height = parseInt(val('height'));
+  const startWeight = parseFloat(val('start'));
+  const currentWeight = parseFloat(val('current'));
+  const goalWeight = val('goal') ? parseFloat(val('goal')) : null;
+  const startSys = val('sys') ? parseInt(val('sys')) : null;
+  const startDia = val('dia') ? parseInt(val('dia')) : null;
+
+  if (!height || isNaN(height) || height < 36 || height > 96) {
+    return fail('Height must be between 36 and 96 inches.');
   }
-
-  if (isNaN(height) || isNaN(startWeight) || isNaN(currentWeight)) {
-    alert('Invalid values');
-    return;
+  if (!startWeight || isNaN(startWeight)) return fail('Starting weight is required.');
+  if (!currentWeight || isNaN(currentWeight)) return fail('Current weight is required.');
+  if ((startSys && !startDia) || (startDia && !startSys)) {
+    return fail('Starting blood pressure needs both numbers.');
   }
-
-  if (height < 36 || height > 96) {
-    alert('Height must be between 36 and 96 inches');
-    return;
+  if (startSys && startDia && startDia >= startSys) {
+    return fail('Systolic should be higher than diastolic.');
   }
 
   try {
-    // Update participant height, starting weight, and goal
     await Store.updateParticipant(participantName, {
       height_inches: height,
       start_weight_lbs: startWeight,
-      goal_weight_lbs: goalWeight
+      goal_weight_lbs: goalWeight,
+      start_systolic: startSys,
+      start_diastolic: startDia
     });
 
-    // If current weight differs from starting weight, add a weigh-in
-    if (currentWeight !== startWeight) {
-      await Store.addWeighIn(participantName, DateUtils.today(), currentWeight);
-    }
+    // Record current weight as today's weigh-in
+    await Store.addWeighIn(participantName, DateUtils.today(), currentWeight);
 
     editingProfile = null;
-    renderProfiles();
-    alert('Profile updated!');
+    UI.render();
   } catch (error) {
     console.error('Error updating profile:', error);
-    alert('Error updating profile. Check console.');
+    fail('Save failed. Check your connection and try again.');
   }
 }
