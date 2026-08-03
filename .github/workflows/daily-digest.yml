@@ -1,0 +1,66 @@
+name: Daily digest email
+
+on:
+  schedule:
+    # 12:00 UTC = 7am CDT (summer) / 6am CST (winter).
+    # GitHub cron is always UTC and does not follow daylight saving.
+    - cron: '0 12 * * *'
+
+  # Lets you run it by hand from the Actions tab to test
+  workflow_dispatch:
+    inputs:
+      report_date:
+        description: 'Date to report on (YYYY-MM-DD). Blank = yesterday.'
+        required: false
+      dry_run:
+        description: 'Build the email but do not send it'
+        type: boolean
+        default: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build digest
+        id: digest
+        env:
+          DIGEST_TZ: America/Chicago
+          SITE_URL: https://johnhowardrush-tech.github.io/Bear-Paws-Fitness-Tracker
+          REPORT_DATE: ${{ inputs.report_date }}
+        run: node scripts/daily-digest.mjs
+
+      - name: Preview (always visible in the run log)
+        run: cat digest.txt
+
+      - name: Send email
+        if: ${{ inputs.dry_run != true }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: Bear Paws Fitness Tracker <${{ secrets.MAIL_USERNAME }}>
+          to: ${{ secrets.DIGEST_RECIPIENTS }}
+          subject: ${{ steps.digest.outputs.subject }}
+          html_body: file://digest.html
+          body: file://digest.txt
+          convert_markdown: false
+
+      - name: Upload digest as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: digest-${{ steps.digest.outputs.report_date }}
+          path: |
+            digest.html
+            digest.txt
+          retention-days: 7
